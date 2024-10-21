@@ -1,1 +1,2 @@
-#test
+def test():
+    pass
