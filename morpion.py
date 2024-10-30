@@ -158,21 +158,84 @@ class Game:
         print("count : ", self.count_pos)
         
 
-G = Game(3, 5)
 
-s = ""
-G.test()
-while s != "stop":
-    s = input("stop : ")
-    c = G.turn
-    final_y = int(input("final y : "))
-    final_x = int(input("final x : "))
-    i = input("new ? : ")
-    if i != "y":
-        init_y = int(input("init y : "))
-        init_x = int(input("init x : "))
-        G.play_move(Move(c, (final_y, final_x), (init_y, init_x)))
-    else:
-        G.play_move(Move(c, (final_y, final_x), None))
+def ai_move(G, is_new):
+    if is_new:
+        return Move(G.turn, (int(input("y final : ")), int(input("x final : "))), None)
+    return Move(G.turn, (int(input("y final : ")), int(input("x final : "))), (int(input("y init : ")), int(input("x init : "))))
+
+def player_move(G, is_new):
+    (y_f, x_f) = (int(input("y final : ")), int(input("x final : ")))
+    while y_f<0 or y_f>=G.size or x_f<0 or x_f>=G.size or G.board[y_f][x_f] != 0:
+        (y_f, x_f) = (int(input("y final : ")), int(input("x final : ")))
+
+    if is_new:
+        return Move(G.turn, (y_f, x_f), None)
+    
+    (y_i, x_i) = (int(input("y init : ")), int(input("x init : ")))
+    while y_i<0 or y_i>=G.size or x_i<0 or x_i>=G.size or G.board[y_i][x_i] != G.turn:
+        (y_i, x_i) = (int(input("y init : ")), int(input("x init : ")))
+
+    return Move(G.turn, (y_f, x_f), (y_i, x_i))
+
+
+def main(player_color, size, enabled_repetitions):
+    G = Game(size, enabled_repetitions)
+    G.test()
+
+    if player_color == 2:
+        G.play_move(ai_move(G, True))
+        G.test()
+        G.change_turn()
+        if G.result != 0:
+            return G.result
+
+    for i in range(size-1):
+        G.play_move(player_move(G, True))
+        G.test()
+        G.change_turn()
+        if G.result != 0:
+            return G.result
+        G.play_move(ai_move(G, True))
+        G.test()
+        G.change_turn()
+        if G.result != 0:
+            return G.result
+        
+    G.play_move(player_move(G, True))
     G.test()
     G.change_turn()
+    if G.result != 0:
+        return G.result
+    
+    if player_color == 1:
+        G.play_move(ai_move(G, True))
+        G.test()
+        G.change_turn()
+        if G.result != 0:
+            return G.result
+        
+    if player_color == 2:
+        G.play_move(ai_move(G, False))
+        G.test()
+        G.change_turn()
+        if G.result != 0:
+            return G.result
+        
+    while True:
+        G.play_move(player_move(G, False))
+        G.test()
+        G.change_turn()
+        if G.result != 0:
+            return G.result
+        G.play_move(ai_move(G, False))
+        G.test()
+        G.change_turn()
+        if G.result != 0:
+            return G.result
+        
+
+print(main(1, 3, 5))
+
+        
+
