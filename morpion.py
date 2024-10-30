@@ -61,6 +61,7 @@ class Game:
         self.board = [[0 for _ in range(size)] for _ in range(size)]
         self.current_pos = 1
         self.count_pos = {1 : 1}
+        self.played_moves = 0
 
     # change_turn permet de changer le trait
     def change_turn(self):
@@ -156,6 +157,7 @@ class Game:
             print(l)
         print("\ncurrent pos : ", self.current_pos)
         print("count : ", self.count_pos)
+        print("played moves : ", self.played_moves)
         
 
 
@@ -163,6 +165,13 @@ def ai_move(G, is_new):
     if is_new:
         return Move(G.turn, (int(input("y final : ")), int(input("x final : "))), None)
     return Move(G.turn, (int(input("y final : ")), int(input("x final : "))), (int(input("y init : ")), int(input("x init : "))))
+
+def make_move_ai(G):
+    G.play_move(ai_move(G, G.played_moves < G.size))
+    G.played_moves += 0.5
+    G.change_turn()
+    G.test()
+
 
 def player_move(G, is_new):
     (y_f, x_f) = (int(input("y final : ")), int(input("x final : ")))
@@ -178,59 +187,29 @@ def player_move(G, is_new):
 
     return Move(G.turn, (y_f, x_f), (y_i, x_i))
 
+def make_move_player(G):
+    G.play_move(player_move(G, G.played_moves < G.size))
+    G.played_moves += 0.5
+    G.change_turn()
+    G.test()
+
+
 
 def main(player_color, size, enabled_repetitions):
     G = Game(size, enabled_repetitions)
     G.test()
 
     if player_color == 2:
-        G.play_move(ai_move(G, True))
-        G.test()
-        G.change_turn()
+        make_move_ai(G)
         if G.result != 0:
             return G.result
 
-    for i in range(size-1):
-        G.play_move(player_move(G, True))
-        G.test()
-        G.change_turn()
-        if G.result != 0:
-            return G.result
-        G.play_move(ai_move(G, True))
-        G.test()
-        G.change_turn()
-        if G.result != 0:
-            return G.result
-        
-    G.play_move(player_move(G, True))
-    G.test()
-    G.change_turn()
-    if G.result != 0:
-        return G.result
-    
-    if player_color == 1:
-        G.play_move(ai_move(G, True))
-        G.test()
-        G.change_turn()
-        if G.result != 0:
-            return G.result
-        
-    if player_color == 2:
-        G.play_move(ai_move(G, False))
-        G.test()
-        G.change_turn()
-        if G.result != 0:
-            return G.result
-        
     while True:
-        G.play_move(player_move(G, False))
-        G.test()
-        G.change_turn()
+        make_move_player(G)
         if G.result != 0:
             return G.result
-        G.play_move(ai_move(G, False))
-        G.test()
-        G.change_turn()
+        
+        make_move_ai(G)
         if G.result != 0:
             return G.result
         
