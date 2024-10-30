@@ -62,6 +62,13 @@ class Game:
         self.current_pos = 1
         self.count_pos = {1 : 1}
 
+    # change_turn permet de changer le trait
+    def change_turn(self):
+        if self.turn == 1:
+            self.turn = 2
+        elif self.turn == 2:
+            self.turn = 1
+
     '''
     play_move prend en argument un coup de classe Move
     et modifie l'instance de Game afin de prendre en compte 
@@ -97,7 +104,21 @@ class Game:
             self.count_pos[self.current_pos] = 1
 
         # On vérifie si le coup joué est gagnant
-        pass
+        win_row = True
+        win_column = True
+        win_diag1 = True
+        win_diag2 = True
+        for i in range(n):
+            if b[y][i] != col:
+                win_row = False
+            if b[i][x] != col:
+                win_column = False
+            if y != x or b[i][i] != col:
+                win_diag1 = False
+            if y != n-1-x or b[i][n-1-i] != col:
+                win_diag2 = False
+        if win_row or win_column or win_diag1 or win_diag2:
+            self.result = col
 
     '''
     cancel_move prend en argument un coup de classe Move
@@ -129,19 +150,29 @@ class Game:
             self.current_pos += 1
 
     def test(self):
+        print("\n")
         b = self.board
         for l in b:
             print(l)
-        print("current pos : ", self.current_pos)
+        print("\ncurrent pos : ", self.current_pos)
         print("count : ", self.count_pos)
         
 
-G = Game(5, 10)
+G = Game(3, 5)
+
+s = ""
 G.test()
-G.play_move(Move(1, (3, 3), None))
-G.test()
-G.cancel_move(Move(1, (3, 3), None))
-G.test()
-G.play_move(Move(1, (0, 1), None))
-G.play_move(Move(2, (0, 0), None))
-G.test()
+while s != "stop":
+    s = input("stop : ")
+    c = G.turn
+    final_y = int(input("final y : "))
+    final_x = int(input("final x : "))
+    i = input("new ? : ")
+    if i != "y":
+        init_y = int(input("init y : "))
+        init_x = int(input("init x : "))
+        G.play_move(Move(c, (final_y, final_x), (init_y, init_x)))
+    else:
+        G.play_move(Move(c, (final_y, final_x), None))
+    G.test()
+    G.change_turn()
