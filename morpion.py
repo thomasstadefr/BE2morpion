@@ -155,9 +155,6 @@ class Game:
         b = self.board
         for l in b:
             print(l)
-        print("\ncurrent pos : ", self.current_pos)
-        print("count : ", self.count_pos)
-        print("played moves : ", self.played_moves)
         
 
 
