@@ -1,3 +1,5 @@
+from morpion import*
+
 def ai_move(G, is_new):
     if is_new:
         return Move(G.turn, (int(input("y final : ")), int(input("x final : "))), None)

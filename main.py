@@ -1,3 +1,7 @@
+from morpion import*
+from ai import make_move_ai
+from player import make_move_player
+
 def main(player_color, size, enabled_repetitions):
     G = Game(size, enabled_repetitions)
     G.test()

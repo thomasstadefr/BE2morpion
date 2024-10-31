@@ -1,3 +1,5 @@
+from morpion import*
+
 def player_move(G, is_new):
     (y_f, x_f) = (int(input("y final : ")), int(input("x final : ")))
     while y_f<0 or y_f>=G.size or x_f<0 or x_f>=G.size or G.board[y_f][x_f] != 0:
