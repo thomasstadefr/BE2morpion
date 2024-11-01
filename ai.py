@@ -63,6 +63,23 @@ def ai_move_min_max(G, h, depth):
     alpha = [-99999]
     beta = [99999]
 
+    # check_final traite le cas où on atteint une position terminale
+    def check_final(G, m):
+        if G.result == 1:
+                G.result = 0
+                G.cancel_move(m)
+                return (99999, m) # cas terminal -> 1 a gagné
+            
+        if G.result == 2:
+            G.result = 0
+            G.cancel_move(m)
+            return (-99999, m) # cas terminal -> 2 a gagné
+        
+        if G.result == 3:
+            G.result = 0
+            G.cancel_move(m)
+            return (0, m) # cas terminal -> match nul
+
     '''
     get_max renvoie le couple (score, coup) ayant le score maximal pour l'heuristique h
     
@@ -79,6 +96,9 @@ def ai_move_min_max(G, h, depth):
         best_move = l_moves[0]
 
         G.play_move(best_move)
+        if G.result != 0: # si on a atteint une position terminale
+            return check_final(G, best_move)
+        
         G.played_moves += 0.5
         G.change_turn()
         a = get_min(d-1)[0]
@@ -88,24 +108,15 @@ def ai_move_min_max(G, h, depth):
 
         for m in l_moves:  # pour chaque coup, on le joue puis on effectue l'appel croisé et get_min et enfin on l'annule
             G.play_move(m)
+            if G.result != 0:
+                return check_final(G, m)
+            
             G.played_moves += 0.5
             G.change_turn()
             score = get_min(d-1)[0]
             G.change_turn()
             G.played_moves -= 0.5
             G.cancel_move(m)
-
-            if G.result == 1:
-                G.result = 0
-                return (score, m) # cas terminal -> 1 a gagné
-            
-            if G.result == 2:
-                G.result = 0
-                return (score, m) # cas terminal -> 2 a gagné
-            
-            if G.result == 3:
-                G.result = 0
-                return (score, m) # cas terminal -> match nul
 
             if score>beta[0]: # dans ce cas on réalise une coupure bêta
                 return (score, None)
@@ -124,6 +135,9 @@ def ai_move_min_max(G, h, depth):
         best_move = l_moves[0]
         
         G.play_move(best_move)
+        if G.result != 0:
+            return check_final(G, best_move)
+        
         G.played_moves += 0.5
         G.change_turn()
         b = get_max(d-1)[0]
@@ -133,24 +147,15 @@ def ai_move_min_max(G, h, depth):
 
         for m in l_moves:
             G.play_move(m)
+            if G.result != 0:
+                return check_final(G, m)
+            
             G.played_moves += 0.5
             G.change_turn()
             score = get_max(d-1)[0]
             G.change_turn()
             G.played_moves -= 0.5
             G.cancel_move(m)
-
-            if G.result == 1:
-                G.result = 0
-                return (score, m) # cas terminal -> 1 a gagné
-            
-            if G.result == 2:
-                G.result = 0
-                return (score, m) # cas terminal -> 2 a gagné
-            
-            if G.result == 3:
-                G.result = 0
-                return (score, m) # cas terminal -> match nul
 
             if score<alpha[0]:
                 return (score, None)
