@@ -163,13 +163,13 @@ class Game:
         init_pos = m.init_pos
         final_pos = m.final_pos
         (y, x) = final_pos
-        b[y][x] = col
+        self.board.grille[y][x] = col
 
         # On calcule l'encodage de la position résultante
         self.current_pos += col * fast_pow_3(n*y+x+1)
         if init_pos != None:
             (i, j) = init_pos
-            b[i][j] = 0
+            self.board.grille[i][j] = 0
             self.current_pos -= col * fast_pow_3(n*i+j+1)
         if col == 1:
             self.current_pos += 1

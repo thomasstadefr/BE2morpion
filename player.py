@@ -2,7 +2,7 @@ from morpion import *
 
 
 def player_move(G, is_new):
-    print("À ton tour ! Vers quelle case veux-tu mettre ton pion ?")
+    print("À ton tour ! Sur quelle case veux-tu mettre ton pion ?")
     G.board.boutons_on()
     G.board.coup_choisi = False
     (y_f, x_f) = G.board.wait_for_player()

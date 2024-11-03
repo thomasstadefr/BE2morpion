@@ -23,12 +23,14 @@ def boucle(G):
     while True:
         make_move_player(G)
         G.board.fenetre.after(1, G.board.afficher_grille)
+        G.test()
         if G.result != 0:
             print("BRAVO ! 💪")
             return G.result
 
         make_move_ai(G)
         G.board.fenetre.after(1, G.board.afficher_grille)
+        G.test()
         if G.result != 0:
             print("Perdu...😭")
             return G.result
