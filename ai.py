@@ -1,5 +1,8 @@
-from morpion import*
+from morpion import *
 from random import choice
+from copy import deepcopy
+import random
+import math
 
 
 '''
@@ -9,36 +12,37 @@ et le booléen indiquant si le coup à jouer consiste
 
 et renvoie la liste des coups autorisés
 '''
+
+
 def lst_allowed_moves(G, is_new):
     n = G.size
     c = G.turn
     res = []
 
-    if not(is_new):
+    if not (is_new):
         lst_pawns = []
         for i in range(n):
             for j in range(n):
-                if G.board[i][j] == c:
+                if G.board.grille[i][j] == c:
                     lst_pawns.append((i, j))
-        
+
         for i in range(n):
             for j in range(n):
-                if G.board[i][j] == 0:
+                if G.board.grille[i][j] == 0:
                     for k in range(n):
                         res.append(Move(c, (i, j), lst_pawns[k]))
 
     else:
         for i in range(n):
             for j in range(n):
-                if G.board[i][j] == 0:
+                if G.board.grille[i][j] == 0:
                     res.append(Move(c, (i, j), None))
-
     return res
-
 
 
 def ai_move_random(G, is_new):
     return choice(lst_allowed_moves(G, is_new))
+
 
 def h1(G):
     if G.result == 1:
@@ -57,6 +61,8 @@ l'heuristique h et la profondeur d'exploration depth
 et renvoie le coup de l'IA, déterminé en utilisant l'algorithme
 de recherche arborescente min_max avec l'élagage alpha-bêta
 '''
+
+
 def ai_move_min_max(G, h, depth):
     # alpha et bêta sont définis à des valeurs arbitraires pour alpha = -inf, bêta = +inf
     # on utilise des pointeurs pour les modifier par effets de bord
@@ -66,19 +72,19 @@ def ai_move_min_max(G, h, depth):
     # check_final traite le cas où on atteint une position terminale
     def check_final(G, m):
         if G.result == 1:
-                G.result = 0
-                G.cancel_move(m)
-                return (99999, m) # cas terminal -> 1 a gagné
-            
+            G.result = 0
+            G.cancel_move(m)
+            return (99999, m)  # cas terminal -> 1 a gagné
+
         if G.result == 2:
             G.result = 0
             G.cancel_move(m)
-            return (-99999, m) # cas terminal -> 2 a gagné
-        
+            return (-99999, m)  # cas terminal -> 2 a gagné
+
         if G.result == 3:
             G.result = 0
             G.cancel_move(m)
-            return (0, m) # cas terminal -> match nul
+            return (0, m)  # cas terminal -> match nul
 
     '''
     get_max renvoie le couple (score, coup) ayant le score maximal pour l'heuristique h
@@ -90,15 +96,15 @@ def ai_move_min_max(G, h, depth):
     '''
     def get_max(d):
         if d == 0:
-            return (h(G), None) # cas terminal -> on a atteint la profondeur maximale donc on calcule le score par l'heuristique
-        
-        l_moves = lst_allowed_moves(G, G.played_moves<G.size)
+            return (h(G), None)  # cas terminal -> on a atteint la profondeur maximale donc on calcule le score par l'heuristique
+
+        l_moves = lst_allowed_moves(G, G.played_moves < G.size)
         best_move = l_moves[0]
 
         G.play_move(best_move)
-        if G.result != 0: # si on a atteint une position terminale
+        if G.result != 0:  # si on a atteint une position terminale
             return check_final(G, best_move)
-        
+
         G.played_moves += 0.5
         G.change_turn()
         a = get_min(d-1)[0]
@@ -110,7 +116,7 @@ def ai_move_min_max(G, h, depth):
             G.play_move(m)
             if G.result != 0:
                 return check_final(G, m)
-            
+
             G.played_moves += 0.5
             G.change_turn()
             score = get_min(d-1)[0]
@@ -118,26 +124,26 @@ def ai_move_min_max(G, h, depth):
             G.played_moves -= 0.5
             G.cancel_move(m)
 
-            if score>beta[0]: # dans ce cas on réalise une coupure bêta
+            if score > beta[0]:  # dans ce cas on réalise une coupure bêta
                 return (score, None)
-            if score>a: # cas où l'on a trouvé un coup meilleur que les précédants
+            if score > a:  # cas où l'on a trouvé un coup meilleur que les précédants
                 a = score
                 best_move = m
 
         beta[0] = a   # on met à jour la valeur de bêta car on a trouvé le coup pour l'instant meilleur
         return (a, best_move)
-    
+
     def get_min(d):  # fonctionne similairement à get_max (avec une coupure alpha)
         if d == 0:
             return (h(G), None)
-    
-        l_moves = lst_allowed_moves(G, G.played_moves<G.size)
+
+        l_moves = lst_allowed_moves(G, G.played_moves < G.size)
         best_move = l_moves[0]
-        
+
         G.play_move(best_move)
         if G.result != 0:
             return check_final(G, best_move)
-        
+
         G.played_moves += 0.5
         G.change_turn()
         b = get_max(d-1)[0]
@@ -149,7 +155,7 @@ def ai_move_min_max(G, h, depth):
             G.play_move(m)
             if G.result != 0:
                 return check_final(G, m)
-            
+
             G.played_moves += 0.5
             G.change_turn()
             score = get_max(d-1)[0]
@@ -157,12 +163,12 @@ def ai_move_min_max(G, h, depth):
             G.played_moves -= 0.5
             G.cancel_move(m)
 
-            if score<alpha[0]:
+            if score < alpha[0]:
                 return (score, None)
-            if score<b:
+            if score < b:
                 b = score
                 best_move = m
-            
+
         alpha[0] = b
         return (b, best_move)
 
@@ -172,12 +178,12 @@ def ai_move_min_max(G, h, depth):
         return get_min(depth)[1]
 
 
-
 def ai_move(G, is_new):
     return ai_move_min_max(G, h1, 3)
+
 
 def make_move_ai(G):
     G.play_move(ai_move(G, G.played_moves < G.size))
     G.played_moves += 0.5
     G.change_turn()
-    G.test()
+    G.board.afficher_grille()

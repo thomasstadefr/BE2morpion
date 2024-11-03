@@ -1,3 +1,75 @@
+import tkinter as tk
+
+
+"""Instance pour gérer le plateau, elle contient notamment toutes les méthodes graphiques."""
+
+
+class NonGraphic_Board:
+    def __init__(self, size):
+        self.size = size
+        self.coup_choisi = False
+
+        self.grille = [[0 for _ in range(self.size)] for _ in range(self.size)]
+
+
+class Board:
+    def __init__(self, size):
+        self.size = size
+        self.coup_choisi = False
+        self.fenetre = tk.Tk()
+        self.fenetre.title("Jeu de Morpion")
+
+        # Création des boutons pour la grille
+        self.boutons = [[None for _ in range(self.size)] for _ in range(self.size)]
+        self.couleurs = {1: 'X', 2: 'O'}
+        for i in range(self.size):
+            for j in range(self.size):
+                self.boutons[i][j] = tk.Button(self.fenetre, text='', font=('Helvetica', 20), height=2, width=5, command=lambda i=i, j=j: self.button_click(i, j))
+                self.boutons[i][j].grid(row=i, column=j)
+                self.boutons[i][j].config(text='')
+                # self.boutons[i][j].config(state=tk.DISABLED)
+        self.boutons_off()
+
+        self.grille = [[0 for _ in range(self.size)] for _ in range(self.size)]
+
+    def afficher_grille(self):
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.grille[i][j] == 1:
+                    text = 'O'
+                elif self.grille[i][j] == 2:
+                    text = 'X'
+                else:
+                    text = ''
+                self.boutons[i][j].config(text=text)
+
+    def placer_pion(self, col, final_pos, init_pos):
+        if init_pos is not None:
+            self.boutons[init_pos[0]][init_pos[1]].config(text='')
+        self.boutons[final_pos[0]][final_pos[1]].config(text=self.couleurs[col])
+
+    def button_click(self, i, j):
+        self.coup_choisi = (i, j)
+
+    def wait_for_player(self):
+        while self.coup_choisi is False:
+            pass
+        return self.coup_choisi
+
+    def boutons_on(self):
+        for boutons in self.boutons:
+            for bouton in boutons:
+                bouton.config(state=tk.NORMAL)
+
+    def boutons_off(self):
+        for boutons in self.boutons:
+            for bouton in boutons:
+                bouton.config(state=tk.DISABLED)
+
+    def get_bouton(self, i, j):
+        return self.boutons[i][j]
+
+
 '''
 Un coup est une instance de la classe Move, avec comme attributs
 la couleur du pion posé, la position finale du pion posé et la 
@@ -6,8 +78,9 @@ position initiale du pion posé (éventuellement None si ce pion est nouveau)
 Les joueurs 1 et 2 auront respectivement des pions de couleur 1 et 2
 '''
 
+
 class Move:
-    def __init__(self, col, final_pos, init_pos = None):
+    def __init__(self, col, final_pos, init_pos=None):
         self.color = col
         self.init_pos = init_pos
         self.final_pos = final_pos
@@ -20,13 +93,15 @@ par l'entier n (en gardant en mémoire les résultats déjà calculés)
 L'encodage d'une position utilise en effet ces calculs
 '''
 
-pow_3 = {0:1, 1:3}
+pow_3 = {0: 1, 1: 3}
+
+
 def fast_pow_3(n):
     if n == 0 or n == 1 or n in pow_3.keys():
         return pow_3[n]
     y = fast_pow_3(n//2)
     res = y**2
-    if n%2 == 1:
+    if n % 2 == 1:
         res *= 3
     pow_3[n] = res
     return res
@@ -52,15 +127,19 @@ Pour compter les occurences de chaque position, on encode chaque position par un
 (le méthode est détaillée dans le rapport)
 '''
 
+
 class Game:
-    def __init__(self, size, enabled_repetitions):
+    def __init__(self, size, enabled_repetitions, is_graphic=True):
         self.size = size
         self.enabled_repetitions = enabled_repetitions
         self.turn = 1
         self.result = 0
-        self.board = [[0 for _ in range(size)] for _ in range(size)]
+        if is_graphic is True:
+            self.board = Board(self.size)
+        else:
+            self.board = NonGraphic_Board(self.size)
         self.current_pos = 1
-        self.count_pos = {1 : 1}
+        self.count_pos = {1: 1}
         self.played_moves = 0
 
     # change_turn permet de changer le trait
@@ -75,9 +154,10 @@ class Game:
     et modifie l'instance de Game afin de prendre en compte 
     que ce coup a été joué
     '''
+
     def play_move(self, m):
         # On remplie la case correspondant au coup joué
-        b = self.board
+        b = self.board.grille
         col = m.color
         n = self.size
         init_pos = m.init_pos
@@ -126,9 +206,10 @@ class Game:
     et modifie l'instance de Game afin de prendre en compte 
     que ce coup a été annulé
     '''
+
     def cancel_move(self, m):
         # On vide la case correspondant au coup annulé
-        b = self.board
+        b = self.board.grille
         col = m.color
         n = self.size
         init_pos = m.init_pos
@@ -152,20 +233,6 @@ class Game:
 
     def test(self):
         print("\n")
-        b = self.board
+        b = self.board.grille
         for l in b:
             print(l)
-        
-
-
-
-
-
-
-
-
-
-
-
-        
-
