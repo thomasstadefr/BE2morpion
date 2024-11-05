@@ -255,7 +255,7 @@ class NoeudMCTS():
             if not current_node.is_fully_expanded():
                 return current_node.expand()
             else:
-                current_node = current_node.best_child()  # On choisi la meilleure feuille selon l'heuristique ubs1
+                current_node = current_node.best_child()  # On choisi la meilleure feuille selon l'heuristique ucb1
         return current_node
 
     def is_terminal_node(self):
