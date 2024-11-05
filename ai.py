@@ -205,73 +205,6 @@ class Noeud():
         self.etat = deepcopy(G.board.grille)
 
 
-class MonteCarloTreeSearchNode():
-    def __init__(self, state, parent=None, parent_action=None):
-        self.state = state
-        self.parent = parent
-        self.parent_action = parent_action
-        self.children = []
-        self._number_of_visits = 0
-        self._results = defaultdict(int)
-        self._results[1] = 0
-        self._results[-1] = 0
-        self._untried_actions = None
-        self._untried_actions = self.untried_actions()
-        return
-
-    def untried_actions(self):
-        self._untried_actions = self.state.get_legal_actions()
-        return self._untried_actions
-
-    def q(self):
-        wins = self._results[1]
-        loses = self._results[-1]
-        return wins - loses
-
-    def n(self):
-        return self._number_of_visits
-
-    def expand(self):
-        action = self._untried_actions.pop()
-        next_state = self.state.move(action)
-        child_node = MonteCarloTreeSearchNode(
-            next_state, parent=self, parent_action=action)
-
-        self.children.append(child_node)
-        return child_node
-
-    def is_terminal_node(self):
-        return self.state.is_game_over()
-
-    def rollout(self):
-        current_rollout_state = self.state
-
-        while not current_rollout_state.is_game_over():
-
-            possible_moves = current_rollout_state.get_legal_actions()
-
-            action = self.rollout_policy(possible_moves)
-            current_rollout_state = current_rollout_state.move(action)
-        return current_rollout_state.game_result()
-
-    def backpropagate(self, result):
-        self._number_of_visits += 1.
-        self._results[result] += 1.
-        if self.parent:
-            self.parent.backpropagate(result)
-
-    def is_fully_expanded(self):
-        return len(self._untried_actions) == 0
-
-    def best_child(self, c_param=0.1):
-        choices_weights = [(c.q() / c.n()) + c_param * np.sqrt((2 * np.log(self.n()) / c.n())) for c in self.children]
-        return self.children[np.argmax(choices_weights)]
-
-    def rollout_policy(self, possible_moves):
-
-        return possible_moves[np.random.randint(len(possible_moves))]
-
-
 class NoeudMCTS():
     def __init__(self, state, parent=None, parent_action=None):
         self.state = Game(state.size, state.enabled_repetitions, False)  # On créé une nouvelle instance Game pour copier l'état et éviter les effets de bords. Puis on copie la valeur de tous les attributs
@@ -382,65 +315,6 @@ def ai_move_MCTS(G, itermax, joueur_actuel):
     root = NoeudMCTS(state=G)
     selected_node = root.best_action(itermax)
     return selected_node.parent_action
-
-
-"""
-def ai_move_MCTS(G, itermax, joueur_actuel):
-    G_copy = Game(G.size, G.enabled_repetitions, False)
-    G_copy.board.grille = deepcopy(G.board.grille)
-    G_copy.change_turn()
-    root = Noeud(deepcopy(G_copy))
-
-    for _ in range(itermax):
-        node = deepcopy(root)
-        # G_copy = Game(node.G.size, node.G.enabled_repetitions, False)
-        # G_copy.board.grille = deepcopy(node.G.board.grille)
-        print("FST BCL ", node.G.turn)
-        node.G.test()
-
-        # Sélection
-        while node.est_fully_expanded() and node.enfants:
-            node = meilleur_noeud_ucb1(node)
-
-        # Expansion
-        if not node.est_fully_expanded():
-            action = random.choice(node.actions_possibles())
-            G_copy.play_move(action)
-            G_copy.played_moves += 0.5
-            node.maj(G_copy)
-            print("iteration ", _, 'tour ', node.G.turn)
-            node.G.test()
-            enfant = Noeud(G_copy, node, action)
-            node.ajouter_enfant(enfant)
-            node = deepcopy(enfant)
-
-        # Simulation
-        joueur_simulation = joueur_actuel
-        while True:
-            actions_possibles = node.actions_possibles()
-            if not actions_possibles:
-                break
-            action = random.choice(actions_possibles)
-            G_copy.play_move(action)
-            G_copy.played_moves += 0.5
-            G_copy.change_turn()
-            node.maj(G_copy)
-            print("Iteration ", _)
-            node.G.test()
-            if G_copy.result == 1:
-                if joueur_simulation == joueur_actuel:
-                    node.victoires += 1
-                node.visites += 1
-                break
-            joueur_simulation = 2 if joueur_simulation == 1 else 1
-
-        # Propagation
-        while node is not None:
-            node.visites += 1
-            node = node.parent
-
-    return max(root.enfants, key=lambda n: n.visites).move_from
-"""
 
 
 def meilleur_noeud_ucb1(node):
